@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import netgame.common.Hub;
 import pkgPokerBLL.Action;
@@ -69,26 +70,63 @@ public class PokerHub extends Hub {
 			case StartGame:
 				// Get the rule from the Action object.
 				Rule rle = new Rule(act.geteGame());
+				UUID dealerID = null; 
+				Player dealer = actPlayer;
 				
 				//TODO Lab #5 - If neither player has 'the button', pick a random player
-				//		and assign the button.				
+				//		and assign the button.
+				for (UUID x : HubPokerTable.getHmPlayer().keySet()) {
+					if (x == act.getPlayer().getPlayerID()) {
+						dealerID = x;
+					}
+				}
+				if (dealerID == null) {
+					dealerID = HubPokerTable.getHmPlayer().keySet().iterator().next();
+				}
 
-				//TODO Lab #5 - Start the new instance of GamePlay
+				// Start the new instance of GamePlay
+				HubGamePlay = new GamePlay(rle, dealerID);
 								
 				// Add Players to Game
+				HubGamePlay.setGamePlayers(HubPokerTable.getHmPlayer());
 				
 				// Set the order of players
+				HubGamePlay.setiActOrder(GamePlay.GetOrder(dealer.getiPlayerPosition()));
 				
 
 
 			case Draw:
+				
+				Rule drle = new Rule(act.geteGame());			
+				HubGamePlay.seteDrawCountLast(eDrawCount.geteDrawCount(HubGamePlay.geteDrawCountLast().getDrawNo() + 1));
+				
+				if (drle.GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardDestination() == eCardDestination.Player) {
+					for (int order : HubGamePlay.getiActOrder()) {
+						for (Player player : HubPokerTable.getHmPlayer().values()) {
+							if (order == player.getiPlayerPosition()) {
+								for (int i = 0; i < drle.GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardCount().getCardCount(); i++) {
+									HubGamePlay.drawCard(player, eCardDestination.Player);
+								}
+							}
+						}
+					}
+				}
+				else {
+					for (int i = 0; i < drle.GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardCount().getCardCount(); i++) {
+						HubGamePlay.drawCard(null, eCardDestination.Community);
+					}
+				}
+
 
 				//TODO Lab #5 -	Draw card(s) for each player in the game.
 				//TODO Lab #5 -	Make sure to set the correct visiblity
 				//TODO Lab #5 -	Make sure to account for community cards
 
 				//TODO Lab #5 -	Check to see if the game is over
-				HubGamePlay.isGameOver();
+				if (HubGamePlay.geteDrawCountLast().getDrawNo() == drle.GetMaxDrawCount()) {
+					HubGamePlay.isGameOver();
+				}
+				
 				
 				resetOutput();
 				//	Send the state of the gameplay back to the clients

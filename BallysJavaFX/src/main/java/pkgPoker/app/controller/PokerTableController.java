@@ -25,6 +25,7 @@ import pkgPoker.app.MainApp;
 import pkgPokerEnum.eAction;
 import pkgPokerEnum.eGame;
 import pkgPokerBLL.Action;
+import pkgPokerBLL.Card;
 import pkgPokerBLL.GamePlay;
 import pkgPokerBLL.Player;
 import pkgPokerBLL.Table;
@@ -100,7 +101,7 @@ public class PokerTableController implements Initializable {
 	public void GetGameState() {
 	}
 
-	// TODO: Lab #4 - Complete (fix) setiPlayerPosition
+
 	public void btnSitLeave_Click(ActionEvent event) {
 
 		ToggleButton btn = (ToggleButton) event.getSource();
@@ -219,6 +220,35 @@ public class PokerTableController implements Initializable {
 	}
 
 	public void Handle_GameState(GamePlay HubPokerGame) {
+		
+		hboxP1Cards.getChildren().clear();
+		hboxP2Cards.getChildren().clear();
+		
+		for (Player player : HubPokerGame.getGamePlayers().values()) {
+			for (Card card : HubPokerGame.getPlayerHand(player).getCardsInHand()) {
+				int pos = player.getiPlayerPosition();
+				if (player.getPlayerID() == mainApp.getPlayer().getPlayerID()) {
+					switch (pos) {
+					case 1:
+						hboxP1Cards.getChildren().add(BuildImage(card.getiCardNbr()));
+						break;
+					case 2: 
+						hboxP2Cards.getChildren().add(BuildImage(card.getiCardNbr()));
+						break;					
+					}
+				}
+				else {
+					switch (pos) {
+					case 1:
+						hboxP1Cards.getChildren().add(BuildImage(0));
+						break;
+					case 2: 
+						hboxP2Cards.getChildren().add(BuildImage(0));
+						break;
+					}
+				}
+			}
+		}
 
 	}
 
