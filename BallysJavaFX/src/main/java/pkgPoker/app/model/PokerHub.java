@@ -71,12 +71,9 @@ public class PokerHub extends Hub {
 				// Get the rule from the Action object.
 				Rule rle = new Rule(act.geteGame());
 				UUID dealerID = null; 
-				Player dealer = actPlayer;
 				
-				//TODO Lab #5 - If neither player has 'the button', pick a random player
-				//		and assign the button.
 				for (UUID x : HubPokerTable.getHmPlayer().keySet()) {
-					if (x == act.getPlayer().getPlayerID()) {
+					if (x.equals(actPlayer.getPlayerID())) {
 						dealerID = x;
 					}
 				}
@@ -91,20 +88,25 @@ public class PokerHub extends Hub {
 				HubGamePlay.setGamePlayers(HubPokerTable.getHmPlayer());
 				
 				// Set the order of players
-				HubGamePlay.setiActOrder(GamePlay.GetOrder(dealer.getiPlayerPosition()));
+				int[] Order = null; 
+				for(Player player : HubPokerTable.getHmPlayer().values()){
+					if(player.getPlayerID().equals(dealerID)){
+						Order = GamePlay.GetOrder(player.getiPlayerPosition());
+					}
+				}
+				HubGamePlay.setiActOrder(Order);
 				
 
 
 			case Draw:
 				
-				Rule drle = new Rule(act.geteGame());			
 				HubGamePlay.seteDrawCountLast(eDrawCount.geteDrawCount(HubGamePlay.geteDrawCountLast().getDrawNo() + 1));
 				
-				if (drle.GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardDestination() == eCardDestination.Player) {
+				if (HubGamePlay.getRule().GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardDestination() == eCardDestination.Player) {
 					for (int order : HubGamePlay.getiActOrder()) {
 						for (Player player : HubPokerTable.getHmPlayer().values()) {
 							if (order == player.getiPlayerPosition()) {
-								for (int i = 0; i < drle.GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardCount().getCardCount(); i++) {
+								for (int i = 0; i < HubGamePlay.getRule().GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardCount().getCardCount(); i++) {
 									HubGamePlay.drawCard(player, eCardDestination.Player);
 								}
 							}
@@ -112,18 +114,13 @@ public class PokerHub extends Hub {
 					}
 				}
 				else {
-					for (int i = 0; i < drle.GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardCount().getCardCount(); i++) {
+					for (int i = 0; i < HubGamePlay.getRule().GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardCount().getCardCount(); i++) {
 						HubGamePlay.drawCard(null, eCardDestination.Community);
 					}
 				}
 
 
-				//TODO Lab #5 -	Draw card(s) for each player in the game.
-				//TODO Lab #5 -	Make sure to set the correct visiblity
-				//TODO Lab #5 -	Make sure to account for community cards
-
-				//TODO Lab #5 -	Check to see if the game is over
-				if (HubGamePlay.geteDrawCountLast().getDrawNo() == drle.GetMaxDrawCount()) {
+				if (HubGamePlay.geteDrawCountLast().getDrawNo() == HubGamePlay.getRule().GetMaxDrawCount()) {
 					HubGamePlay.isGameOver();
 				}
 				
@@ -135,6 +132,7 @@ public class PokerHub extends Hub {
 			case ScoreGame:
 				// Am I at the end of the game?
 
+				HubGamePlay.ScoreGame();
 				resetOutput();
 				sendToAll(HubGamePlay);
 				break;
