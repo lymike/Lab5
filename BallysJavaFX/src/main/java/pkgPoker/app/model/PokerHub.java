@@ -102,7 +102,8 @@ public class PokerHub extends Hub {
 				
 				HubGamePlay.seteDrawCountLast(eDrawCount.geteDrawCount(HubGamePlay.geteDrawCountLast().getDrawNo() + 1));
 				
-				if (HubGamePlay.getRule().GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardDestination() == eCardDestination.Player) {
+				if (actPlayer.getPlayerID().equals(HubGamePlay.getGameDealer())) {
+					if (HubGamePlay.getRule().GetDrawCard(HubGamePlay.geteDrawCountLast()).getCardDestination() == eCardDestination.Player) {
 					for (int order : HubGamePlay.getiActOrder()) {
 						for (Player player : HubPokerTable.getHmPlayer().values()) {
 							if (order == player.getiPlayerPosition()) {
@@ -118,7 +119,7 @@ public class PokerHub extends Hub {
 						HubGamePlay.drawCard(null, eCardDestination.Community);
 					}
 				}
-
+				}
 
 				if (HubGamePlay.geteDrawCountLast().getDrawNo() == HubGamePlay.getRule().GetMaxDrawCount()) {
 					HubGamePlay.isGameOver();
